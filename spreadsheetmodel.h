@@ -19,11 +19,18 @@ public:
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    void recalculateAll(); // دالة جديدة لتحديث كل الخلايا
 
 private:
     QHash<QPair<int, int>, QString> m_cells;
     int m_rows = 100;
     int m_cols = 26;
+
+    // دوال مساعدة لمحرك الصيغ
+    QString evaluateFormula(const QString &formula, int currentRow, int currentCol) const;
+    double getCellValue(int row, int col) const;
+    QString cellToAddress(int row, int col) const;
+    QPair<int, int> addressToCell(const QString &address) const;
 };
 
-#endif // SPREADSHEETMODEL_H
+#endif
