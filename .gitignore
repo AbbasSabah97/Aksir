@@ -1,0 +1,27 @@
+# مجلدات البناء
+build/
+build-*/
+out/
+cmake-build-*/
+
+# ملفات IDE
+.vs/
+.vscode/
+*.user
+*.suo
+*.VC.db
+*.VC.opendb
+
+# ملفات نظام
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ملفات ناتجة
+*.exe
+*.dll
+*.lib
+*.obj
+*.pdb
+*.ilk
+*.exp
