@@ -27,7 +27,7 @@ SpreadsheetWindow::SpreadsheetWindow(QWidget *parent) : QMainWindow(parent)
 
     // شريط التبويبات (Ribbon)
     m_ribbonTabs = new QTabWidget(this);
-    m_ribbonTabs->setFixedHeight(100); // تصغير ارتفاع الشريط لكي لا يأخذ مساحة ضخمة
+    m_ribbonTabs->setFixedHeight(100); // تصغير ارتفاع الشريط
     setupRibbon();
 
     // شريط الصيغة
@@ -76,6 +76,9 @@ SpreadsheetWindow::SpreadsheetWindow(QWidget *parent) : QMainWindow(parent)
     applyTheme(false);
 }
 
+// =========================================================
+// هذا هو الكود الذي كان ناقصاً وتسبب في الخطأ (Unresolved External Symbol)
+// =========================================================
 void SpreadsheetWindow::toggleTheme()
 {
     m_isDarkMode = !m_isDarkMode;
