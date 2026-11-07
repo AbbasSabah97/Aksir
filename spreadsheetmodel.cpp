@@ -23,10 +23,9 @@ QVariant SpreadsheetModel::data(const QModelIndex &index, int role) const
         return applyNumberFormat(cell.value, cell.format);
     }
     
-    if (role == Qt::BackgroundRole) return cell.bgColor;
-    if (role == Qt::ForegroundRole) return cell.textColor;
-    
-    // السطر الذي تم تعديله لحل مشكلة البناء
+    // إرجاع الألوان فقط إذا كانت محددة (لكي يسمح بتغيير الألوان حسب الوضع)
+    if (role == Qt::BackgroundRole && cell.bgColor.isValid()) return cell.bgColor;
+    if (role == Qt::ForegroundRole && cell.textColor.isValid()) return cell.textColor;
     if (role == Qt::TextAlignmentRole) return static_cast<int>(cell.alignment);
     
     if (role == Qt::FontRole) {
