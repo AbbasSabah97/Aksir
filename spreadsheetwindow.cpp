@@ -10,14 +10,12 @@
 #include <QFontComboBox>
 #include <QComboBox>
 #include <QFrame>
+#include <QApplication>
 
 SpreadsheetWindow::SpreadsheetWindow(QWidget *parent) : QMainWindow(parent)
 {
     setWindowTitle("أكسير - محرر الجداول");
     resize(1200, 800);
-    setStyleSheet("QMainWindow { background-color: #f3f2f1; } "
-                  "QTableView { background-color: white; gridline-color: #e1dfdd; selection-background-color: #cce8ff; selection-color: black; } "
-                  "QHeaderView::section { background-color: #f3f2f1; border: 1px solid #d2d0ce; padding: 2px; }");
 
     m_model = new SpreadsheetModel(this);
     m_tableView = new QTableView(this);
@@ -27,16 +25,13 @@ SpreadsheetWindow::SpreadsheetWindow(QWidget *parent) : QMainWindow(parent)
     m_tableView->setSelectionMode(QAbstractItemView::ExtendedSelection);
     m_tableView->setCurrentIndex(m_model->index(0, 0));
 
-    // 1. إعداد شريط التبويبات (Ribbon Tabs)
+    // شريط التبويبات (Ribbon)
     m_ribbonTabs = new QTabWidget(this);
-    m_ribbonTabs->setStyleSheet("QTabWidget::pane { border: 1px solid #d2d0ce; background: #f3f2f1; } "
-                                "QTabBar::tab { padding: 6px 15px; background: #f3f2f1; border: none; } "
-                                "QTabBar::tab:selected { color: #107c41; border-bottom: 2px solid #107c41; }");
+    m_ribbonTabs->setFixedHeight(100); // تصغير ارتفاع الشريط لكي لا يأخذ مساحة ضخمة
     setupRibbon();
 
-    // 2. شريط الصيغة (Formula Bar)
+    // شريط الصيغة
     QWidget *formulaWidget = new QWidget(this);
-    formulaWidget->setStyleSheet("background-color: white; border-bottom: 1px solid #d2d0ce;");
     QHBoxLayout *formulaLayout = new QHBoxLayout(formulaWidget);
     formulaLayout->setContentsMargins(5, 2, 5, 2);
     
@@ -45,15 +40,15 @@ SpreadsheetWindow::SpreadsheetWindow(QWidget *parent) : QMainWindow(parent)
     m_cellLabel->setAlignment(Qt::AlignCenter);
     
     QLabel *fxLabel = new QLabel("fx", this);
-    fxLabel->setStyleSheet("color: gray; font-style: italic;");
+    fxLabel->setStyleSheet("font-style: italic;");
     m_formulaBar = new QLineEdit(this);
-    m_formulaBar->setStyleSheet("border: none; font-size: 14px;");
+    m_formulaBar->setStyleSheet("font-size: 14px; padding: 2px;");
     
     formulaLayout->addWidget(m_cellLabel);
     formulaLayout->addWidget(fxLabel);
     formulaLayout->addWidget(m_formulaBar);
 
-    // 3. التجميع الرئيسي
+    // التجميع الرئيسي
     QWidget *centralWidget = new QWidget(this);
     QVBoxLayout *mainLayout = new QVBoxLayout(centralWidget);
     mainLayout->setContentsMargins(0, 0, 0, 0);
@@ -65,16 +60,80 @@ SpreadsheetWindow::SpreadsheetWindow(QWidget *parent) : QMainWindow(parent)
 
     setupStatusBar();
 
-    // 4. الأحداث
+    // إضافة زر تبديل الوضع (Light/Dark) في شريط علوي جديد
+    QToolBar *topToolbar = addToolBar("إعدادات");
+    topToolbar->setMovable(false);
+    QAction *themeAction = topToolbar->addAction("🌓 تبديل الوضع (فاتح/داكن)");
+    connect(themeAction, &QAction::triggered, this, &SpreadsheetWindow::toggleTheme);
+
+    // ربط الأحداث
     connect(m_tableView->selectionModel(), &QItemSelectionModel::currentChanged,
             this, &SpreadsheetWindow::updateFormulaBar);
     connect(m_formulaBar, &QLineEdit::returnPressed,
             this, &SpreadsheetWindow::commitFormula);
+
+    // تطبيق الوضع الفاتح افتراضياً
+    applyTheme(false);
+}
+
+void SpreadsheetWindow::toggleTheme()
+{
+    m_isDarkMode = !m_isDarkMode;
+    applyTheme(m_isDarkMode);
+}
+
+void SpreadsheetWindow::applyTheme(bool isDark)
+{
+    if (isDark) {
+        // الوضع الداكن
+        QString darkStyle = R"(
+            QMainWindow, QWidget { background-color: #1e1e1e; color: #ffffff; }
+            QTableView { background-color: #252526; gridline-color: #3e3e42; color: #ffffff; selection-background-color: #094771; selection-color: #ffffff; }
+            QHeaderView::section { background-color: #2d2d30; color: #cccccc; border: 1px solid #3e3e42; padding: 4px; }
+            QLineEdit { background-color: #3c3c3c; color: #ffffff; border: 1px solid #555555; }
+            QLabel { color: #ffffff; }
+            QToolButton { background: transparent; color: #ffffff; border: 1px solid transparent; border-radius: 3px; padding: 4px; }
+            QToolButton:hover { background: #3e3e42; border: 1px solid #555555; }
+            QToolButton:pressed { background: #555555; }
+            QComboBox { background-color: #3c3c3c; color: #ffffff; border: 1px solid #555555; }
+            QComboBox QAbstractItemView { background-color: #3c3c3c; color: #ffffff; }
+            QTabWidget::pane { border: 1px solid #3e3e42; background: #1e1e1e; }
+            QTabBar::tab { background: #1e1e1e; color: #aaaaaa; padding: 6px 15px; }
+            QTabBar::tab:selected { color: #ffffff; border-bottom: 2px solid #0e639c; }
+            QStatusBar { background: #1e1e1e; color: #ffffff; border-top: 1px solid #3e3e42; }
+            QFrame { border-right: 1px solid #3e3e42; }
+            QToolBar { background: #2d2d30; border-bottom: 1px solid #3e3e42; }
+        )";
+        qApp->setStyleSheet(darkStyle);
+    } else {
+        // الوضع الفاتح
+        QString lightStyle = R"(
+            QMainWindow, QWidget { background-color: #f3f2f1; color: #000000; }
+            QTableView { background-color: #ffffff; gridline-color: #e1dfdd; color: #000000; selection-background-color: #cce8ff; selection-color: #000000; }
+            QHeaderView::section { background-color: #f3f2f1; color: #000000; border: 1px solid #d2d0ce; padding: 4px; }
+            QLineEdit { background-color: #ffffff; color: #000000; border: 1px solid #d2d0ce; }
+            QLabel { color: #000000; }
+            QToolButton { background: transparent; color: #000000; border: 1px solid transparent; border-radius: 3px; padding: 4px; }
+            QToolButton:hover { background: #e1dfdd; border: 1px solid #c8c6c4; }
+            QToolButton:pressed { background: #d2d0ce; }
+            QComboBox { background-color: #ffffff; color: #000000; border: 1px solid #d2d0ce; }
+            QComboBox QAbstractItemView { background-color: #ffffff; color: #000000; }
+            QTabWidget::pane { border: 1px solid #d2d0ce; background: #f3f2f1; }
+            QTabBar::tab { background: #f3f2f1; color: #605e5c; padding: 6px 15px; }
+            QTabBar::tab:selected { color: #107c41; border-bottom: 2px solid #107c41; }
+            QStatusBar { background: #f3f2f1; color: #000000; border-top: 1px solid #d2d0ce; }
+            QFrame { border-right: 1px solid #d2d0ce; }
+            QToolBar { background: #f3f2f1; border-bottom: 1px solid #d2d0ce; }
+        )";
+        qApp->setStyleSheet(lightStyle);
+    }
+    
+    // تحديث الجدول لتطبيق الألوان الجديدة
+    m_model->recalculateAll();
 }
 
 void SpreadsheetWindow::setupRibbon()
 {
-    // --- تبويب Home ---
     QWidget *homeTab = new QWidget();
     QHBoxLayout *homeLayout = new QHBoxLayout(homeTab);
     homeLayout->setContentsMargins(5, 5, 5, 5);
@@ -82,11 +141,12 @@ void SpreadsheetWindow::setupRibbon()
 
     // مجموعة الخطوط (Font Group)
     QFrame *fontFrame = new QFrame();
-    fontFrame->setStyleSheet("QFrame { border-right: 1px solid #d2d0ce; }");
     QVBoxLayout *fontLayout = new QVBoxLayout(fontFrame);
     fontLayout->setContentsMargins(0, 0, 10, 0);
+    fontLayout->setSpacing(2);
     
     QHBoxLayout *fontToolbar = new QHBoxLayout();
+    fontToolbar->setSpacing(2);
     QFontComboBox *fontCombo = new QFontComboBox();
     fontCombo->setFixedWidth(150);
     QComboBox *sizeCombo = new QComboBox();
@@ -112,7 +172,6 @@ void SpreadsheetWindow::setupRibbon()
     fontLabel->setStyleSheet("color: gray; font-size: 10px;");
     fontLayout->addWidget(fontLabel, 0, Qt::AlignCenter);
 
-    // ربط أحداث الخطوط
     connect(btnBold, &QToolButton::clicked, this, [this, btnBold]() {
         applyFormat(0, !btnBold->property("active").toBool()); btnBold->setProperty("active", !btnBold->property("active").toBool());
     });
@@ -124,16 +183,14 @@ void SpreadsheetWindow::setupRibbon()
     });
     connect(btnTextColor, &QToolButton::clicked, this, [this]() { pickColor(4); });
     connect(btnBgColor, &QToolButton::clicked, this, [this]() { pickColor(3); });
-    connect(fontCombo, &QFontComboBox::currentFontChanged, this, [this](const QFont &font) {
-        // يمكن إضافة تغيير الخط هنا (يحتاج تعديل النموذج لدعم العائلة)
-    });
 
     // مجموعة المحاذاة (Alignment Group)
     QFrame *alignFrame = new QFrame();
-    alignFrame->setStyleSheet("QFrame { border-right: 1px solid #d2d0ce; }");
     QVBoxLayout *alignLayout = new QVBoxLayout(alignFrame);
     alignLayout->setContentsMargins(0, 0, 10, 0);
+    alignLayout->setSpacing(2);
     QHBoxLayout *alignToolbar = new QHBoxLayout();
+    alignToolbar->setSpacing(2);
     
     QToolButton *btnAlignLeft = new QToolButton(); btnAlignLeft->setText("≡");
     QToolButton *btnAlignCenter = new QToolButton(); btnAlignCenter->setText("≡"); btnAlignCenter->setStyleSheet("qproperty-alignment: AlignCenter;");
@@ -155,7 +212,9 @@ void SpreadsheetWindow::setupRibbon()
     QFrame *numFrame = new QFrame();
     QVBoxLayout *numLayout = new QVBoxLayout(numFrame);
     numLayout->setContentsMargins(0, 0, 10, 0);
+    numLayout->setSpacing(2);
     QHBoxLayout *numToolbar = new QHBoxLayout();
+    numToolbar->setSpacing(2);
     
     QComboBox *formatCombo = new QComboBox();
     formatCombo->addItems({"General", "Currency", "Percent"});
@@ -186,7 +245,6 @@ void SpreadsheetWindow::setupRibbon()
 void SpreadsheetWindow::setupStatusBar()
 {
     QStatusBar *statusBar = this->statusBar();
-    statusBar->setStyleSheet("QStatusBar { background: #f3f2f1; border-top: 1px solid #d2d0ce; }");
     
     QLabel *readyLabel = new QLabel("Ready", this);
     QSlider *zoomSlider = new QSlider(Qt::Horizontal, this);
