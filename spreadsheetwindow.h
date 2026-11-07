@@ -5,6 +5,10 @@
 #include <QLineEdit>
 #include <QLabel>
 #include <QModelIndex>
+#include <QTabWidget>
+#include <QToolBar>
+#include <QStatusBar>
+#include <QSlider>
 
 class QTableView;
 class SpreadsheetModel;
@@ -19,12 +23,18 @@ public:
 private slots:
     void updateFormulaBar(const QModelIndex &current);
     void commitFormula();
+    void applyFormat(int formatType, const QVariant &value);
+    void pickColor(int formatType);
 
 private:
+    void setupRibbon();
+    void setupStatusBar();
+
     QTableView *m_tableView;
     SpreadsheetModel *m_model;
     QLineEdit *m_formulaBar;
     QLabel *m_cellLabel;
+    QTabWidget *m_ribbonTabs;
 };
 
-#endif // SPREADSHEETWINDOW_H
+#endif
