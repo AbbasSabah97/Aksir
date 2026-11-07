@@ -8,16 +8,15 @@
 #include <QColor>
 #include <QFont>
 
-// هيكل لتخزين بيانات وتنسيقات كل خلية
 struct CellData {
     QString value;
     bool isBold = false;
     bool isItalic = false;
     bool isUnderline = false;
-    QColor bgColor = QColor(255, 255, 255); // أبيض افتراضي
-    QColor textColor = QColor(0, 0, 0);     // أسود افتراضي
+    QColor bgColor;   // لون غير محدد افتراضياً (شفاف)
+    QColor textColor; // لون غير محدد افتراضياً (يورث من الوضع الحالي)
     Qt::Alignment alignment = Qt::AlignLeft | Qt::AlignVCenter;
-    QString format = "General"; // General, Currency, Percent
+    QString format = "General"; 
 };
 
 class SpreadsheetModel : public QAbstractTableModel
