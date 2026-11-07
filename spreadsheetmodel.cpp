@@ -25,7 +25,10 @@ QVariant SpreadsheetModel::data(const QModelIndex &index, int role) const
     
     if (role == Qt::BackgroundRole) return cell.bgColor;
     if (role == Qt::ForegroundRole) return cell.textColor;
-    if (role == Qt::TextAlignmentRole) return cell.alignment;
+    
+    // السطر الذي تم تعديله لحل مشكلة البناء
+    if (role == Qt::TextAlignmentRole) return static_cast<int>(cell.alignment);
+    
     if (role == Qt::FontRole) {
         QFont font("Segoe UI", 11);
         font.setBold(cell.isBold);
