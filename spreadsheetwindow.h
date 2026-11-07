@@ -25,19 +25,19 @@ private slots:
     void commitFormula();
     void applyFormat(int formatType, const QVariant &value);
     void pickColor(int formatType);
-    void toggleTheme(); // دالة جديدة
+    void toggleTheme(); // الإعلان عن دالة تبديل الوضع
 
 private:
     void setupRibbon();
     void setupStatusBar();
-    void applyTheme(bool isDark); // دالة جديدة
+    void applyTheme(bool isDark); // الإعلان عن دالة تطبيق الوضع
 
     QTableView *m_tableView;
     SpreadsheetModel *m_model;
     QLineEdit *m_formulaBar;
     QLabel *m_cellLabel;
     QTabWidget *m_ribbonTabs;
-    bool m_isDarkMode = false; // متغير لتتبع الوضع الحالي
+    bool m_isDarkMode = false; 
 };
 
 #endif
